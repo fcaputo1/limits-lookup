@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Limits Lookup — UglyCash</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #0f0f0f;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 40px 24px;
+  }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+  .sub { color: #888; font-size: 13px; margin-bottom: 28px; }
+  .row { display: flex; gap: 10px; width: 100%; max-width: 620px; }
+  input {
+    flex: 1; padding: 12px 16px; border-radius: 8px;
+    border: 1px solid #333; background: #1e1e1e; color: #fff;
+    font-size: 14px; outline: none;
+  }
+  input:focus { border-color: #6366f1; }
+  button {
+    padding: 12px 24px; background: #6366f1; color: #fff;
+    border: none; border-radius: 8px; font-size: 14px;
+    font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  button:hover { background: #4f46e5; }
+  button:disabled { background: #444; cursor: default; }
+  .status {
+    margin-top: 20px; font-size: 14px; color: #888;
+    width: 100%; max-width: 620px; text-align: center; min-height: 20px;
+  }
+  .grid {
+    margin-top: 24px; width: 100%; max-width: 620px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  .card {
+    background: #1a1a1a; border-radius: 10px; padding: 16px 20px;
+  }
+  .card-label { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .card-value { font-size: 20px; font-weight: 700; }
+  .card-value.near { color: #f87171; }
+  .card-value.safe { color: #6b7280; font-size: 13px; font-weight: 400; }
+  .error { color: #f87171; margin-top: 28px; font-size: 15px; }
+</style>
+</head>
+<body>
+<h1>Limits Lookup</h1>
+<p class="sub">Ingresá el Distinct ID del usuario</p>
+<div class="row">
+  <input id="uid" type="text" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autofocus>
+  <button id="btn" onclick="search()">Buscar</button>
+</div>
+<div class="status" id="status"></div>
+<div class="grid" id="grid" style="display:none"></div>
+
+<script>
+document.getElementById('uid').addEventListener('keydown', e => {
+  if (e.key === 'Enter') search();
+});
+
+async function search() {
+  const uid = document.getElementById('uid').value.trim();
+  if (!uid) return;
+  const btn = document.getElementById('btn');
+  const status = document.getElementById('status');
+  const grid = document.getElementById('grid');
+  btn.disabled = true;
+  grid.style.display = 'none';
+  status.innerHTML = '⏳ Consultando Mixpanel...';
+  try {
+    const r = await fetch('/api/search?id=' + encodeURIComponent(uid));
+    const data = await r.json();
+    if (data.error === 'not_found') {
+      status.innerHTML = '<span style="color:#f87171">❌ Usuario no encontrado — no está cerca de ningún límite.</span>';
+    } else if (data.error) {
+      status.innerHTML = '<span style="color:#f87171">⚠️ ' + data.error + '</span>';
+    } else {
+      status.innerHTML = '';
+      grid.style.display = 'grid';
+      grid.innerHTML = Object.entries(data).map(([key, d]) => {
+        if (d.amount !== null) {
+          return `<div class="card">
+            <div class="card-label">${d.label}</div>
+            <div class="card-value near">$${d.amount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+          </div>`;
+        } else {
+          return `<div class="card">
+            <div class="card-label">${d.label}</div>
+            <div class="card-value safe">Not close to limit</div>
+          </div>`;
+        }
+      }).join('');
+    }
+  } catch(e) {
+    status.innerHTML = '<span style="color:#f87171">Error de conexión.</span>';
+  }
+  btn.disabled = false;
+}
+</script>
+</body>
+</html>
