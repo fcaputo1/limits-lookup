@@ -36,13 +36,10 @@
     margin-top: 20px; font-size: 14px; color: #888;
     width: 100%; max-width: 620px; text-align: center; min-height: 20px;
   }
-  .grid {
-    margin-top: 24px; width: 100%; max-width: 620px;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  }
-  .card {
-    background: #1a1a1a; border-radius: 10px; padding: 16px 20px;
-  }
+  .grid { margin-top: 24px; width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 16px; }
+  .group-title { color: #aaa; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; }
+  .group-row { display: flex; gap: 10px; }
+  .card { flex: 1; background: #1a1a1a; border-radius: 10px; padding: 14px 18px; }
   .card-label { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
   .card-value { font-size: 20px; font-weight: 700; }
   .card-value.near { color: #f87171; }
@@ -83,20 +80,30 @@ async function search() {
       status.innerHTML = '<span style="color:#f87171">⚠️ ' + data.error + '</span>';
     } else {
       status.innerHTML = '';
-      grid.style.display = 'grid';
-      grid.innerHTML = Object.entries(data).map(([key, d]) => {
-        if (d.amount !== null) {
-          return `<div class="card">
-            <div class="card-label">${d.label}</div>
-            <div class="card-value near">$${d.amount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
-          </div>`;
-        } else {
-          return `<div class="card">
-            <div class="card-label">${d.label}</div>
-            <div class="card-value safe">Not close to limit</div>
-          </div>`;
-        }
-      }).join('');
+      grid.style.display = 'block';
+
+      const groups = [
+        { title: 'ATM', keys: ['atm_24h', 'atm_30d'] },
+        { title: 'Card Spend', keys: ['card_24h', 'card_30d'] },
+        { title: 'Crypto', keys: ['crypto_30d'] },
+        { title: 'Punto Express Deposit', keys: ['pe_deposit_24h', 'pe_deposit_30d'] },
+        { title: 'Punto Express Withdrawal', keys: ['pe_withdrawal_24h', 'pe_withdrawal_30d'] },
+      ];
+
+      grid.innerHTML = groups.map(g => `
+        <div class="group">
+          <div class="group-title">${g.title}</div>
+          <div class="group-row">
+            ${g.keys.map(key => {
+              const d = data[key];
+              const val = d.amount !== null
+                ? `<div class="card-value near">$${d.amount.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}</div>`
+                : `<div class="card-value safe">Not close to limit</div>`;
+              return `<div class="card"><div class="card-label">${d.label}</div>${val}</div>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
     }
   } catch(e) {
     status.innerHTML = '<span style="color:#f87171">Error de conexión.</span>';
