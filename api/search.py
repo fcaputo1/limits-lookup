@@ -21,6 +21,12 @@ CARDS = {
     "pe_deposit_24h":    89647764,
     "pe_withdrawal_24h": 89647765,
     "pe_withdrawal_30d": 89647766,
+    "walapay_24h":       92745784,
+    "walapay_30d":       92745785,
+    "paysend_24h":       92745762,
+    "paysend_30d":       92745763,
+    "moneygram_24h":     92745781,
+    "moneygram_30d":     92745782,
 }
 
 CARD_LABELS = {
@@ -33,6 +39,12 @@ CARD_LABELS = {
     "pe_deposit_24h":    "Punto Express Deposit 24 Hours",
     "pe_withdrawal_24h": "Punto Express Withdrawal 24 Hours",
     "pe_withdrawal_30d": "Punto Express Withdrawal 30 Days",
+    "walapay_24h":       "Walapay Withdrawal 24 Hours",
+    "walapay_30d":       "Walapay Withdrawal 30 Days",
+    "paysend_24h":       "Paysend Withdrawal 24 Hours",
+    "paysend_30d":       "Paysend Withdrawal 30 Days",
+    "moneygram_24h":     "Moneygram Withdrawal 24 Hours",
+    "moneygram_30d":     "Moneygram Withdrawal 30 Days",
 }
 
 
@@ -79,7 +91,7 @@ def fetch_user(distinct_id):
     auth_cookie = get_auth_cookie()
 
     all_cards = {}
-    with ThreadPoolExecutor(max_workers=9) as ex:
+    with ThreadPoolExecutor(max_workers=len(CARDS)) as ex:
         futures = {ex.submit(fetch_card, key, bid, auth_cookie): key for key, bid in CARDS.items()}
         for f in as_completed(futures):
             key, users = f.result()

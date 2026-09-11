@@ -36,7 +36,7 @@
     margin-top: 20px; font-size: 14px; color: #888;
     width: 100%; max-width: 620px; text-align: center; min-height: 20px;
   }
-  .grid { margin-top: 24px; width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 36px; }
+  .grid { margin-top: 24px; width: 100%; max-width: 620px; display: flex; flex-direction: column; gap: 64px; }
   .group-title { color: #aaa; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; }
   .group-row { display: flex; gap: 10px; }
   .card { flex: 1; background: #1a1a1a; border-radius: 10px; padding: 20px 18px; }
@@ -88,6 +88,9 @@ async function search() {
         { title: 'Crypto', keys: ['crypto_30d'] },
         { title: 'Punto Express Deposit', keys: ['pe_deposit_24h', 'pe_deposit_30d'] },
         { title: 'Punto Express Withdrawal', keys: ['pe_withdrawal_24h', 'pe_withdrawal_30d'] },
+        { title: 'Walapay Withdrawal', keys: ['walapay_24h', 'walapay_30d'] },
+        { title: 'Paysend Withdrawal', keys: ['paysend_24h', 'paysend_30d'] },
+        { title: 'Moneygram Withdrawal', keys: ['moneygram_24h', 'moneygram_30d'] },
       ];
 
       grid.innerHTML = groups.map(g => `
